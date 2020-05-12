@@ -1,4 +1,4 @@
-from settings import Config
+from .settings import Config
 
 
 class Simulation:
@@ -22,5 +22,9 @@ class Simulation:
         for road, node in self.roads, self.nodes:
             road.step()
             node.step()
+
+    def run(self):
+        for t in range(self.config.simulation_duration):
+            self.step()
 
 

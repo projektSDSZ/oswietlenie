@@ -11,6 +11,8 @@ class Config:
     """
     D_CELL_SIZE = 7  # meters
     D_TIME_STEP = 1  # seconds
+    D_VISIBILITY = 30  # CELL_SIZEs
+    D_SIMULATION_DURATION = 100  # TIME_STEPs
 
     def __init__(self, **kwargs):
         """
@@ -29,5 +31,8 @@ class Config:
             dopisać/usunąć linijkę typu self.xyz = kwargs.get("xyz")...
         '''
 
-        self.CELL_SIZE = kwargs.get("CELL_SIZE") if "CELL_SIZE" in kwargs else Config.D_CELL_SIZE  # meters
-        self.TIME_STEP = kwargs.get("TIME_STEP") if "TIME_STEP" in kwargs else Config.D_TIME_STEP  # seconds
+        self.cell_size = kwargs.get("cell_size") if "cell_size" in kwargs else Config.D_CELL_SIZE  # meters
+        self.time_step = kwargs.get("time_step") if "time_step" in kwargs else Config.D_TIME_STEP  # seconds
+        self.visibility = kwargs.get("visibility") if "visibility" in kwargs else Config.D_VISIBILITY  # CELL_SIZEs
+        self.simulation_duration = kwargs.get(
+            "simulation_duration") if "simulation_duration" in kwargs else Config.D_SIMULATION_DURATION
