@@ -1,4 +1,12 @@
+from .settings import Config
+
+from random import uniform
+
+
 class Vehicle:
+    """
+    Default parameters here
+    """
     def __init__(self, **kwargs):
         """
 
@@ -12,10 +20,18 @@ class Vehicle:
             zechcemy wyrzucić lub dodać jakieś pole to wystarczy
             dopisać/usunąć linijkę typu self.xyz = kwargs.get("xyz")...
         '''
+        # give vehicle all information about the simulation's Config
+        self.config = kwargs.get("config") if "config" in kwargs else Config()
 
+        # give the vehicle all information about the Road its on
+        self.road = kwargs.get("road") if "road" in kwargs else None
+
+        # positional values derived from the Nagel-Schreckenberg model
         self.pos = kwargs.get("x") if "x" in kwargs else 0  # current position x(t)
         self.vel = kwargs.get("v") if "v" in kwargs else 0  # current velocity v(t)
-        self.acc = kwargs.get("a") if "a" in kwargs else 0  # current acceleration a(t)
+
+        # keep distance to next car in this variable, usually calculated by its parent Road; in [CELL_SIZE]
+        self.dist_to_next = kwargs.get("dist_to_next") if "dist_to_next" in kwargs else 0
 
         self.behav = kwargs.get("behav") if "behaviour" in kwargs else 0.  # probability of taking a sudden random,
         # the human element, e.g. braking out of fear
@@ -23,3 +39,76 @@ class Vehicle:
         self.dest = kwargs.get("dest") if "dest" in kwargs else 0  # destination, number of possible sinks that agent
         # will ignore before choosing the one through
         # which he leaves
+
+    def slow_down(self, dist_to_next: int) -> int:
+        """
+        :param dist_to_next: free space between this Vehicle and the next one on the Road
+        :return:
+        """
+        self.vel = min(self.vel, dist_to_next - 1)
+        return self.vel
+
+    def speed_up(self, max_vel: int) -> int:
+        """
+        :param max_vel: describes maximum velocity, either determined by Road's speed limit or other factors
+        :return:
+        """
+        self.vel = min(self.vel + 1, max_vel)
+        return self.vel
+
+    def calc_dist_to_next(self) -> int:
+        """
+        Calculate distance to next vehicle. Uses .visibility from the self.config variable
+        -1 means no Vehicle is visible ahead of this one
+        :return: distance in .cell_size units from the next vehicle within .visibility range
+        """
+        visible_cells_checked = 0  # increase this for every cell you check in search for a Vehicle
+        next_road = self.road
+
+        while next_road is not None and visible_cells_checked < self.config.visibility:
+            # special case for the Road that the vehicle is on, to only check ahead of it
+            if visible_cells_checked == 0:
+                curr_road_cells = next_road.cells[self.pos:]
+            else:
+                curr_road_cells = next_road.cells
+            # if this Vehicle is on a Road
+            for elem in curr_road_cells:
+                if visible_cells_checked > self.config.visibility:
+                    # if ran out of visible cells then no Vehicle was encountered during the search
+                    return -1
+                # ELSE
+                # see if this cell contains a Vehicle
+                if elem is not None:
+                    # if element is a Vehicle, return distance to it
+                    self.dist_to_next = visible_cells_checked
+                    return visible_cells_checked
+
+                # if not, mark this cell as checked
+                visible_cells_checked += 1
+
+            # if no valid vehicle was found on this road, try to proceed search to the next one
+            next_road = self.road.end.output_road if self.road.end is not None else None
+
+    def get_speed_limit(self) -> int:
+        return self.road.speed_limit if self.road is not None else -1
+
+    def step(self) -> None:
+        """
+        Calculate increase in velocity, then constraint it by distance between this Vehicle and the next one,
+            according to the Nagel-Schreckenberg model
+        :param max_vel: maximum velocity that this Vehicle can achieve on the current Road
+        :param dist_to_next: distance between this Vehicle and the next one on the Road
+        :return:
+        """
+        # firstly, all Vehicles accelerate by 1 every time step until they reach speed limit
+        self.speed_up(self.get_speed_limit())
+
+        # secondly, Vehicle's speed may get reduced to the distance between itself and the next Vehicle
+        self.slow_down(self.calc_dist_to_next())
+
+        # additionally, every Vehicle has a chance of randomly reducing their speed by 1 on each time step
+        #       this is defined by the behaviour probability value
+        if uniform(0., 1.) <= self.behav:
+            # if a random fraction from 0.0 to 1.0 is smaller than probability of slowing down
+            # slow down by 1 CELL/TIME_STEP
+            self.vel = max(0, self.vel - 1)
