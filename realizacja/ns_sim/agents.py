@@ -1,12 +1,19 @@
-from .settings import Config
+from settings import Config
 
 from random import uniform
+import names
 
 
 class Vehicle:
     """
     Default parameters here
     """
+    D_POS = 0
+    D_VELOCITY = 0
+
+    D_DIST_TO_NEXT = -1
+    D_DEST = 0
+
     def __init__(self, **kwargs):
         """
 
@@ -27,26 +34,26 @@ class Vehicle:
         self.road = kwargs.get("road") if "road" in kwargs else None
 
         # positional values derived from the Nagel-Schreckenberg model
-        self.pos = kwargs.get("x") if "x" in kwargs else 0  # current position x(t)
-        self.vel = kwargs.get("v") if "v" in kwargs else 0  # current velocity v(t)
+        self.pos = kwargs.get("x") if "x" in kwargs else Vehicle.D_POS  # current position x(t)
+        self.vel = kwargs.get("v") if "v" in kwargs else Vehicle.D_VELOCITY  # current velocity v(t)
 
         # keep distance to next car in this variable, usually calculated by its parent Road; in [CELL_SIZE]
-        self.dist_to_next = kwargs.get("dist_to_next") if "dist_to_next" in kwargs else 0
+        self.dist_to_next = kwargs.get("dist_to_next") if "dist_to_next" in kwargs else Vehicle.D_DIST_TO_NEXT
 
-        self.behav = kwargs.get("behav") if "behaviour" in kwargs else 0.  # probability of taking a sudden random,
+        # name the driver
+        self.name = names.get_full_name()
+        self.behav = kwargs.get("behav") if "behav" in kwargs else uniform(0.05, 0.95)  # probability of taking a sudden random,
         # the human element, e.g. braking out of fear
 
-        self.dest = kwargs.get("dest") if "dest" in kwargs else 0  # destination, number of possible sinks that agent
+        self.dest = kwargs.get("dest") if "dest" in kwargs else Vehicle.D_DEST  # destination, number of possible sinks that agent
         # will ignore before choosing the one through
         # which he leaves
 
-    def slow_down(self, dist_to_next: int) -> int:
-        """
-        :param dist_to_next: free space between this Vehicle and the next one on the Road
-        :return:
-        """
-        self.vel = min(self.vel, dist_to_next - 1)
-        return self.vel
+    def __repr__(self):
+        return str(self.name)
+
+    def __str__(self):
+        return str(self.name) + " who fears for his life " + str(self.behav * 100) + "% of the time"
 
     def speed_up(self, max_vel: int) -> int:
         """
@@ -54,6 +61,16 @@ class Vehicle:
         :return:
         """
         self.vel = min(self.vel + 1, max_vel)
+        return self.vel
+
+    def slow_down(self, dist_to_next: int) -> int:
+        """
+        dist_to_next: free space between this Vehicle and the next one on the Road
+        :return:
+        """
+        if dist_to_next < 0:
+            return self.vel
+        self.vel = min(self.vel, dist_to_next - 1)
         return self.vel
 
     def calc_dist_to_next(self) -> int:
@@ -96,8 +113,6 @@ class Vehicle:
         """
         Calculate increase in velocity, then constraint it by distance between this Vehicle and the next one,
             according to the Nagel-Schreckenberg model
-        :param max_vel: maximum velocity that this Vehicle can achieve on the current Road
-        :param dist_to_next: distance between this Vehicle and the next one on the Road
         :return:
         """
         # firstly, all Vehicles accelerate by 1 every time step until they reach speed limit
@@ -108,7 +123,35 @@ class Vehicle:
 
         # additionally, every Vehicle has a chance of randomly reducing their speed by 1 on each time step
         #       this is defined by the behaviour probability value
-        if uniform(0., 1.) <= self.behav:
+        if uniform(0, 1) <= self.behav:
             # if a random fraction from 0.0 to 1.0 is smaller than probability of slowing down
             # slow down by 1 CELL/TIME_STEP
             self.vel = max(0, self.vel - 1)
+
+        # move the vehicle:
+        # if next Node is a Sink
+        if self.road.end.type >= 0:
+            if self.dest <= 0:
+                # Vehicle will slow down if the next intersection is its destination
+                #   its the same formula as before but now intersection is the point at which Vehicle stops
+                # removing the Vehicle is handled automatically by the self.road.end Node,
+                #   which always checks the last cell in its input road
+                self.slow_down(self.road.len - 1 - self.pos)
+            else:
+                self.dest -= 1
+
+        # place Vehicle in its new cell
+        #   move Vehicle over an intersection if appropriate (so from a Road to Road.end.output_road or further)
+        new_pos = self.pos + self.vel
+        new_road = self.road
+        while new_road is not None and new_pos >= new_road.len:
+            new_pos -= new_road.len
+            new_road = new_road.end.output_road
+
+        new_road.cells[new_pos] = self
+
+        # remove it from its previous position
+        new_road.cells[self.pos] = None
+
+        # update its position value
+        self.pos = new_pos

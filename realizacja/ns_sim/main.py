@@ -1,4 +1,6 @@
-from .settings import Config
+from settings import *
+from agents import *
+from roads import *
 
 
 class Simulation:
@@ -19,12 +21,40 @@ class Simulation:
             for their child elements
         :return:
         """
-        for road, node in self.roads, self.nodes:
-            road.step()
-            node.step()
+        # this is basically equivalent to calling step() on every vehicle
+        for r in self.roads:
+            r.step()
+
+        # then you should resolve all nodes, removing or adding vehicles
+        for n in self.nodes:
+            n.step()
 
     def run(self):
         for t in range(self.config.simulation_duration):
             self.step()
 
 
+s = Simulation()
+
+# initialize nodes
+node1 = Node(**{"type": 0, "config": s.config})
+node2 = Node(**{"type": 0, "config": s.config})
+
+# initialize roads
+road1 = Road(**{"len": 100, "start": node1, "end": node2, "config": s.config})
+
+# pass nodes and roads to the simulation
+s.nodes.append(node1)
+s.nodes.append(node2)
+
+s.roads.append(road1)
+
+# run simulation
+s.run()
+
+for n in s.nodes:
+    print(n.added)
+    print(n.removed)
+
+for r in s.roads:
+    print(r.cells)
