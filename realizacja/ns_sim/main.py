@@ -31,6 +31,7 @@ class Simulation:
 
     def run(self):
         for t in range(self.config.simulation_duration):
+            print(f"Step number: {t} of {self.config.simulation_duration}")
             self.step()
 
 
@@ -53,7 +54,7 @@ s.nodes.append(node2)
 
 # initialize roads
 for i in range(len(s.nodes) - 1):
-    new_road = Road(**{"len": 50, "start": s.nodes[i], "end": s.nodes[i+1], "config": s.config})
+    new_road = Road(**{"len": 50, "start": s.nodes[i], "end": s.nodes[i+1], "name": str(i), "config": s.config})
     s.roads.append(new_road)
 
 # run simulation
