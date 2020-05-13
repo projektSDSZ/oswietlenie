@@ -11,6 +11,7 @@ class Node:
     """
     D_SPAWNED_VEHICLES_LIMIT = 10  # maximum number of vehicles a Source can spawn
     D_CHANCE_TO_SPAWN = 0.8  # chance to spawn a vehicle on each time step
+    D_NAME = "Node"
 
     def __init__(self, **kwargs):
         """
@@ -23,6 +24,10 @@ class Node:
         """
         self.config = kwargs.get("config") if "config" in kwargs else Config()
 
+        # node name
+        self.name = kwargs.get("name") if "name" in kwargs else Node.D_NAME
+
+        # type\: Sink, Source or both
         self.type = kwargs.get("type") if "type" in kwargs else 0
 
         self.spawned_vehicles = kwargs.get("spawned_vehicles") if "spawned_vehicles" in kwargs else 0
@@ -79,6 +84,7 @@ class Road:
     Define default parameters here
     """
     D_SPEED_LIMIT = 2  # in [CELL_SIZE / TIME_STEP] -> 13.89m/s == 50km/h
+    D_NAME = "Road"
 
     def __init__(self, **kwargs):
         """
@@ -94,6 +100,9 @@ class Road:
         
         '''
         self.config = kwargs.get("config") if "config" in kwargs else Config()
+
+        # road name
+        self.name = kwargs.get("name") if "name" in kwargs else Road.D_NAME
 
         # road length in [CELL_SIZE]
         self.len = kwargs.get("len") if "len" in kwargs else 0
@@ -113,6 +122,9 @@ class Road:
             self.start.output_road = self
         if self.end is not None:
             self.end.input_road = self
+
+        # preserve information about overwritten Vehicles
+        self.overwritten = list()
 
     def step(self):
         for i in range(len(self.cells) - 1, -1, -1):
