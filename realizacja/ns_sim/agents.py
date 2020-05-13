@@ -148,6 +148,12 @@ class Vehicle:
             new_pos -= new_road.len
             new_road = new_road.end.output_road
 
+        # check if Vehicles overwrite other Vehicles in their movement function
+        if new_road.cells[new_pos] is not None:
+            poor_fellow = new_road.cells[new_pos].name
+            new_road.overwritten.append(poor_fellow)
+            print(f"Collision! {poor_fellow} died!")
+
         new_road.cells[new_pos] = self
 
         # remove it from its previous position
