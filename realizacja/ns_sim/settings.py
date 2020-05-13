@@ -12,7 +12,7 @@ class Config:
     D_CELL_SIZE = 7  # meters
     D_TIME_STEP = 1  # seconds
     D_VISIBILITY = 30  # CELL_SIZEs
-    D_SIMULATION_DURATION = 100  # TIME_STEPs
+    D_SIMULATION_DURATION = 50  # TIME_STEPs
 
     def __init__(self, **kwargs):
         """

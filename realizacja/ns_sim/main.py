@@ -53,7 +53,7 @@ s.nodes.append(node2)
 
 # initialize roads
 for i in range(len(s.nodes) - 1):
-    new_road = Road(**{"len": 50, "start": s.nodes[i], "end": s.nodes[i+1], "config": s.config})
+    new_road = Road(**{"len": 50, "start": s.nodes[i], "end": s.nodes[i+1], "name": str(i), "config": s.config})
     s.roads.append(new_road)
 
 # run simulation
@@ -63,6 +63,9 @@ total_added = list()
 total_removed = list()
 total_overwritten = list()
 
+full_road_cells = list()
+left_on_the_road = list()
+
 for n in s.nodes:
     if n.type >= 0:
         total_added += n.added
@@ -70,8 +73,14 @@ for n in s.nodes:
         total_removed += n.removed
 
 for r in s.roads:
+    full_road_cells += r.cells
     total_overwritten += r.overwritten
+
+for cell in full_road_cells:
+    if cell is not None:
+        left_on_the_road.append(cell)
 
 print(f"{len(total_added)} joined the traffic: {total_added}")
 print(f"{len(total_removed)} left the traffic alive: {total_removed}")
 print(f"{len(total_overwritten)} killed on the road: {total_overwritten}")
+print(f"{len(left_on_the_road)} left on the road: {left_on_the_road}")
