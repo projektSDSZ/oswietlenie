@@ -35,26 +35,52 @@ class Simulation:
 
 
 s = Simulation()
+MID_NODE_COUNT = 20
 
 # initialize nodes
-node1 = Node(**{"type": 0, "config": s.config})
-node2 = Node(**{"type": 0, "config": s.config})
-
-# initialize roads
-road1 = Road(**{"len": 100, "start": node1, "end": node2, "config": s.config})
-
-# pass nodes and roads to the simulation
+# main source
+node1 = Node(**{"type": 1, "config": s.config})
 s.nodes.append(node1)
+
+# middle nodes
+for i in range(MID_NODE_COUNT):
+    new_node = Node(**{"type": 0, "config": s.config})
+    s.nodes.append(new_node)
+
+# main sink
+node2 = Node(**{"type": -1, "config": s.config})
 s.nodes.append(node2)
 
-s.roads.append(road1)
+# initialize roads
+for i in range(len(s.nodes) - 1):
+    new_road = Road(**{"len": 50, "start": s.nodes[i], "end": s.nodes[i+1], "name": str(i), "config": s.config})
+    s.roads.append(new_road)
 
 # run simulation
 s.run()
 
+total_added = list()
+total_removed = list()
+total_overwritten = list()
+
+full_road_cells = list()
+left_on_the_road = list()
+
 for n in s.nodes:
-    print(n.added)
-    print(n.removed)
+    if n.type >= 0:
+        total_added += n.added
+    if n.type <= 0:
+        total_removed += n.removed
 
 for r in s.roads:
-    print(r.cells)
+    full_road_cells += r.cells
+    total_overwritten += r.overwritten
+
+for cell in full_road_cells:
+    if cell is not None:
+        left_on_the_road.append(cell)
+
+print(f"{len(total_added)} joined the traffic: {total_added}")
+print(f"{len(total_removed)} left the traffic alive: {total_removed}")
+print(f"{len(total_overwritten)} killed on the road: {total_overwritten}")
+print(f"{len(left_on_the_road)} left on the road: {left_on_the_road}")
