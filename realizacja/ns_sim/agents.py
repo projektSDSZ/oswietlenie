@@ -79,7 +79,6 @@ class Vehicle:
         -1 means no Vehicle is visible ahead of this one
         :return: distance in .cell_size units from the next vehicle within .visibility range
         """
-        print(f"{self.name} is checking his surroundings")
         visible_cells_checked = 1  # increase this for every cell you check in search for a Vehicle, 1 because we
         # start from the next cell
         next_road = self.road
@@ -172,7 +171,7 @@ class Vehicle:
             new_road.cells[new_pos] = self
 
             # remove it from its previous position
-            new_road.cells[self.pos] = None
+            self.road.cells[self.pos] = None
 
             # update its position value
             self.pos = new_pos
