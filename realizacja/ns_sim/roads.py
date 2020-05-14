@@ -2,7 +2,7 @@ from agents import Vehicle
 from settings import Config
 
 from typing import Optional
-from random import uniform
+from random import uniform, randrange
 
 
 class Node:
@@ -10,7 +10,7 @@ class Node:
     Default parameters
     """
     D_SPAWNED_VEHICLES_LIMIT = 10  # maximum number of vehicles a Source can spawn
-    D_CHANCE_TO_SPAWN = 0.8  # chance to spawn a vehicle on each time step
+    D_CHANCE_TO_SPAWN = 0.05  # chance to spawn a vehicle on each time step
     D_NAME = "Node"
 
     def __init__(self, **kwargs):
@@ -47,7 +47,7 @@ class Node:
             spawn_roll = uniform(0, 1)
             if spawn_roll < self.chance_to_spawn and self.output_available():
                 # create a new vehicle and pass it to output Road
-                kwargs = {"road": self.output_road, "config": self.config, "behaviour": 0.5, "dest": 7}
+                kwargs = {"road": self.output_road, "config": self.config, "behaviour": 0.01, "dest": randrange(0, 15)}
                 vehicle = Vehicle(**kwargs)
                 self.output_road.cells[0] = vehicle
                 self.spawned_vehicles += 1

@@ -5,7 +5,7 @@ from roads import *
 
 class Simulation:
     def __init__(self, **kwargs):
-        self.config = Config()
+        self.config = kwargs.get("config") if "config" in kwargs else Config()
 
         # define nodes first because roads contain references
         #   to start and end nodes
@@ -30,11 +30,36 @@ class Simulation:
             n.step()
 
     def run(self):
+        seconds = 0
+        curr_seconds = 0
+        mins = 0
+        curr_mins = 0
+        hours = 0
+        curr_hours = 0
+        days = 0
+        curr_days = 0
+        years = 0
         for t in range(self.config.simulation_duration):
             self.step()
+            seconds = t+1
+            curr_seconds = seconds % 60
+            if curr_seconds == 0:
+                mins = seconds // 60
+                curr_mins = mins % 60
+                if curr_mins == 0:
+                    hours = mins // 60
+                    curr_hours = hours % 24
+                    if curr_hours == 0:
+                        days = hours // 24
+                        curr_days = days % 365
+                        if curr_days == 0:
+                            years = days // 365
+
+                print(f"{curr_mins} minutes, {curr_hours} hours, {curr_days} days, {years} years have passed")
 
 
-s = Simulation()
+c = Config(**{"simulation_duration": 120})
+s = Simulation(**{"config": c})
 MID_NODE_COUNT = 20
 
 # initialize nodes
@@ -44,7 +69,7 @@ s.nodes.append(node1)
 
 # middle nodes
 for i in range(MID_NODE_COUNT):
-    new_node = Node(**{"type": 0, "config": s.config})
+    new_node = Node(**{"type": randrange(-4, 2), "config": s.config})
     s.nodes.append(new_node)
 
 # main sink
@@ -84,3 +109,4 @@ print(f"{len(total_added)} joined the traffic: {total_added}")
 print(f"{len(total_removed)} left the traffic alive: {total_removed}")
 print(f"{len(total_overwritten)} killed on the road: {total_overwritten}")
 print(f"{len(left_on_the_road)} left on the road: {left_on_the_road}")
+print(f"The road looks like this: {full_road_cells}")
