@@ -47,7 +47,7 @@ class Node:
             spawn_roll = uniform(0, 1)
             if spawn_roll < self.chance_to_spawn and self.output_available():
                 # create a new vehicle and pass it to output Road
-                kwargs = {"road": self.output_road, "config": self.config, "behaviour": 0.01, "dest": randrange(0, 15)}
+                kwargs = {"road": self.output_road, "config": self.config, "behaviour": 0.01, "dest": randrange(0, 35)}
                 vehicle = Vehicle(**kwargs)
                 self.output_road.cells[0] = vehicle
                 self.spawned_vehicles += 1

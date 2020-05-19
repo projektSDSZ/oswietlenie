@@ -58,7 +58,7 @@ class Simulation:
                 print(f"{curr_mins} minutes, {curr_hours} hours, {curr_days} days, {years} years have passed")
 
 
-c = Config(**{"simulation_duration": 120})
+c = Config(**{"simulation_duration": 84000})
 s = Simulation(**{"config": c})
 MID_NODE_COUNT = 20
 
@@ -78,8 +78,10 @@ s.nodes.append(node2)
 
 # initialize roads
 for i in range(len(s.nodes) - 1):
-    new_road = Road(**{"len": 50, "start": s.nodes[i], "end": s.nodes[i+1], "name": str(i), "config": s.config})
+    new_road = Road(**{"len": 25, "start": s.nodes[i], "end": s.nodes[i+1], "name": str(i), "config": s.config})
     s.roads.append(new_road)
+roadCircle = Road(**{"len": 5, "start": node2, "end": node1, "name": "Full circle", "config": s.config})
+s.roads.append(roadCircle)
 
 # run simulation
 s.run()

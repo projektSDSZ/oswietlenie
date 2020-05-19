@@ -51,7 +51,7 @@ class Vehicle:
         # which he leaves
 
     def __repr__(self):
-        return str(self.name)
+        return str(self.name) + " " + str(self.dest) + " " + str(self.behav)
 
     def __str__(self):
         return str(self.name) + " who fears for his life " + str(self.behav * 100) + "% of the time"
