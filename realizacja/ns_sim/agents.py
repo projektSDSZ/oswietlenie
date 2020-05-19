@@ -1,5 +1,6 @@
 from settings import Config
 
+from collections import deque
 from random import uniform
 import names
 
@@ -50,7 +51,7 @@ class Vehicle:
         # which he leaves
 
     def __repr__(self):
-        return str(self.name)
+        return str(self.name) + " " + str(self.dest) + " " + str(self.behav)
 
     def __str__(self):
         return str(self.name) + " who fears for his life " + str(self.behav * 100) + "% of the time"
@@ -60,6 +61,8 @@ class Vehicle:
         :param max_vel: describes maximum velocity, either determined by Road's speed limit or other factors
         :return:
         """
+        if max_vel < 0:
+            return self.vel
         self.vel = min(self.vel + 1, max_vel)
         return self.vel
 
@@ -79,38 +82,66 @@ class Vehicle:
         -1 means no Vehicle is visible ahead of this one
         :return: distance in .cell_size units from the next vehicle within .visibility range
         """
-        visible_cells_checked = 1  # increase this for every cell you check in search for a Vehicle, 1 because we
-        # start from the next cell
+        visible_cells_checked_q = 0
         next_road = self.road
 
-        while next_road is not None and visible_cells_checked < self.config.visibility:
-            # special case for the Road that the vehicle is on, to only check ahead of it
-            if visible_cells_checked == 1:
-                curr_road_cells = next_road.cells[self.pos + 1:]
-            else:
-                curr_road_cells = next_road.cells
-            # if this Vehicle is on a Road
-            for elem in curr_road_cells:
-                if visible_cells_checked > self.config.visibility:
-                    # if ran out of visible cells then no Vehicle was encountered during the search
-                    self.dist_to_next = -1
-                    return -1
-                # ELSE
-                # see if this cell contains a Vehicle
-                if elem is not None:
-                    # if element is a Vehicle, return distance to it
-                    self.dist_to_next = visible_cells_checked
-                    return visible_cells_checked
-
-                visible_cells_checked += 1
-
-            # if no valid vehicle was found on this road, try to proceed search to the next one
+        # 1.initialise the queue, first make a list, slice it to the right size
+        cell_list = list(next_road.cells[self.pos+1:])
+        while len(cell_list) < self.config.visibility:
             if next_road.end is not None:
                 next_road = next_road.end.output_road
             else:
-                self.dist_to_next = -1
-                return -1
+                break
+            if next_road is None:
+                break
+            # 2.add self.config.visibility-many elements to the queue
+            cell_list += list(next_road.cells)
+
+        # 1.5. then pass it to the queue, sliced to the right size
+        cell_queue = deque(list(cell_list[:self.config.visibility]))
+        while len(cell_queue) > 0:
+            # 3.check first element until Vehicle is found or queue empty
+            elem = cell_queue.popleft()
+            if elem is not None:
+                # 4.return however many Nones have been found
+                return visible_cells_checked_q
+            visible_cells_checked_q += 1
         return -1
+
+        # [OLD]: distance calculation
+        # visible_cells_checked = 1  # increase this for every cell you check in search for a Vehicle, 1 because we
+        # # # start from the next cell
+        # while next_road is not None and visible_cells_checked < self.config.visibility:
+        #     # special case for the Road that the vehicle is on, to only check ahead of it
+        #     # initialize the queue
+        #     if visible_cells_checked == 1:
+        #         curr_road_cells = list(next_road.cells[self.pos + 1:])
+        #     else:
+        #         curr_road_cells = list(next_road.cells)
+        #     # if this Vehicle is on a non-empty Road
+        #     while len(curr_road_cells) > 0:
+        #         if visible_cells_checked > self.config.visibility:
+        #             # if ran out of visible cells then no Vehicle was encountered during the search
+        #             self.dist_to_next = -1
+        #             return -1
+        #         # ELSE
+        #         # see if this cell contains a Vehicle
+        #         if curr_road_cells[0] is not None:
+        #             # if element is a Vehicle, return distance to it
+        #             self.dist_to_next = visible_cells_checked - 1
+        #             return visible_cells_checked - 1
+        #
+        #         curr_road_cells.pop(0)
+        #         visible_cells_checked += 1
+        #
+        #     # if no valid vehicle was found on this road, try to proceed search to the next one
+        #     if next_road.end is not None:
+        #         next_road = next_road.end.output_road
+        #         visible_cells_checked += 1
+        #     else:
+        #         self.dist_to_next = -1
+        #         return -1
+        # return -1
 
     def get_speed_limit(self) -> int:
         return self.road.speed_limit if self.road is not None else -1
@@ -136,7 +167,7 @@ class Vehicle:
 
         # move the vehicle:
         # if next Node is a Sink
-        if self.road.end.type >= 0 and self.vel + self.pos >= len(self.road.cells):
+        if self.road.end.type >= 0 and self.vel + self.pos > self.road.len - 1:
             if self.dest <= 0:
                 # Vehicle will slow down if the next intersection is its destination
                 #   its the same formula as before but now intersection is the point at which Vehicle stops
@@ -151,7 +182,7 @@ class Vehicle:
             #   move Vehicle over an intersection if appropriate (so from a Road to Road.end.output_road or further)
             new_pos = self.pos + self.vel
             new_road = self.road
-            while new_road is not None and new_pos >= new_road.len - 1:
+            while new_road is not None and new_pos > new_road.len - 1:
                 if new_road.end.output_available():
                     new_pos -= new_road.len
                     new_road = new_road.end.output_road
@@ -165,7 +196,8 @@ class Vehicle:
             if new_road.cells[new_pos] is not None:
                 poor_fellow = new_road.cells[new_pos].name
                 new_road.overwritten.append(poor_fellow)
-                print(f"Collision! {poor_fellow} killed by {self.name}! Road: {new_road.name} Position: {new_pos}")
+                print(f"Collision! {poor_fellow} killed by {self.name}! Road: {new_road.name} Position: {new_pos} " +
+                      f"From position: {self.pos} Velocity: {self.vel} Perceived distance: {self.dist_to_next}")
 
             # move vehicle
             new_road.cells[new_pos] = self
