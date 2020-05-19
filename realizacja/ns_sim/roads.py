@@ -2,7 +2,7 @@ from agents import Vehicle
 from settings import Config
 
 from typing import Optional
-from random import uniform
+from random import uniform, randrange
 
 
 class Node:
@@ -10,7 +10,8 @@ class Node:
     Default parameters
     """
     D_SPAWNED_VEHICLES_LIMIT = 10  # maximum number of vehicles a Source can spawn
-    D_CHANCE_TO_SPAWN = 0.8  # chance to spawn a vehicle on each time step
+    D_CHANCE_TO_SPAWN = 0.05  # chance to spawn a vehicle on each time step
+    D_NAME = "Node"
 
     def __init__(self, **kwargs):
         """
@@ -23,6 +24,10 @@ class Node:
         """
         self.config = kwargs.get("config") if "config" in kwargs else Config()
 
+        # node name
+        self.name = kwargs.get("name") if "name" in kwargs else Node.D_NAME
+
+        # type\: Sink, Source or both
         self.type = kwargs.get("type") if "type" in kwargs else 0
 
         self.spawned_vehicles = kwargs.get("spawned_vehicles") if "spawned_vehicles" in kwargs else 0
@@ -42,7 +47,7 @@ class Node:
             spawn_roll = uniform(0, 1)
             if spawn_roll < self.chance_to_spawn and self.output_available():
                 # create a new vehicle and pass it to output Road
-                kwargs = {"road": self.output_road, "config": self.config, "behaviour": 0.5, "dest": 0}
+                kwargs = {"road": self.output_road, "config": self.config, "behaviour": 0.01, "dest": randrange(0, 35)}
                 vehicle = Vehicle(**kwargs)
                 self.output_road.cells[0] = vehicle
                 self.spawned_vehicles += 1
@@ -79,6 +84,7 @@ class Road:
     Define default parameters here
     """
     D_SPEED_LIMIT = 2  # in [CELL_SIZE / TIME_STEP] -> 13.89m/s == 50km/h
+    D_NAME = "Road"
 
     def __init__(self, **kwargs):
         """
@@ -94,6 +100,9 @@ class Road:
         
         '''
         self.config = kwargs.get("config") if "config" in kwargs else Config()
+
+        # road name
+        self.name = kwargs.get("name") if "name" in kwargs else Road.D_NAME
 
         # road length in [CELL_SIZE]
         self.len = kwargs.get("len") if "len" in kwargs else 0
@@ -113,6 +122,9 @@ class Road:
             self.start.output_road = self
         if self.end is not None:
             self.end.input_road = self
+
+        # preserve information about overwritten Vehicles
+        self.overwritten = list()
 
     def step(self):
         for i in range(len(self.cells) - 1, -1, -1):
