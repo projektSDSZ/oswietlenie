@@ -1,4 +1,4 @@
-from settings import Config
+from ns_sim.settings import Config
 
 from collections import deque
 from random import uniform
@@ -11,9 +11,12 @@ class Vehicle:
     """
     D_POS = 0
     D_VELOCITY = 0
+    D_MAX_VEL = 5
 
     D_DIST_TO_NEXT = -1
     D_DEST = 0
+
+    ID_COUNTER = 0
 
     def __init__(self, **kwargs):
         """
@@ -28,6 +31,9 @@ class Vehicle:
             zechcemy wyrzucić lub dodać jakieś pole to wystarczy
             dopisać/usunąć linijkę typu self.xyz = kwargs.get("xyz")...
         '''
+        self.id = Vehicle.ID_COUNTER
+        Vehicle.ID_COUNTER += 1
+
         # give vehicle all information about the simulation's Config
         self.config = kwargs.get("config") if "config" in kwargs else Config()
 
@@ -43,8 +49,9 @@ class Vehicle:
 
         # name the driver
         self.name = names.get_full_name()
-        self.behav = kwargs.get("behav") if "behav" in kwargs else uniform(0.05, 0.95)  # probability of taking a sudden random,
+        self.behav = kwargs.get("behav") if "behav" in kwargs else uniform(0.12, 0.4)  # probability of taking a sudden random,
         # the human element, e.g. braking out of fear
+        self.max_vel = kwargs.get("max_vel") if "max_vel" in kwargs else Vehicle.D_MAX_VEL  # car's factory max speed
 
         self.dest = kwargs.get("dest") if "dest" in kwargs else Vehicle.D_DEST  # destination, number of possible sinks that agent
         # will ignore before choosing the one through
@@ -62,6 +69,7 @@ class Vehicle:
         :return:
         """
         if max_vel < 0:
+            self.vel = min(self.vel + 1, self.max_vel)
             return self.vel
         self.vel = min(self.vel + 1, max_vel)
         return self.vel
@@ -160,19 +168,21 @@ class Vehicle:
 
         # additionally, every Vehicle has a chance of randomly reducing their speed by 1 on each time step
         #       this is defined by the behaviour probability value
-        if uniform(0, 1) <= self.behav:
+        if uniform(0., 1.) <= self.behav:
             # if a random fraction from 0.0 to 1.0 is smaller than probability of slowing down
             # slow down by 1 CELL/TIME_STEP
             self.vel = max(0, self.vel - 1)
 
         # move the vehicle:
         # if next Node is a Sink
-        if self.road.end.type >= 0 and self.vel + self.pos > self.road.len - 1:
+        if self.road.end.type <= 0 and self.vel + self.pos > self.road.len - 1:
             if self.dest <= 0:
                 # Vehicle will slow down if the next intersection is its destination
                 #   its the same formula as before but now intersection is the point at which Vehicle stops
                 # removing the Vehicle is handled automatically by the self.road.end Node,
                 #   which always checks the last cell in its input road
+
+                # if this function will slow down the current movement of the vehicle, it means that vehicle can use this sink
                 self.slow_down(self.road.len - 1 - self.pos)
             else:
                 self.dest -= 1
