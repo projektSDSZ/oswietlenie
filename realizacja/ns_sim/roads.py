@@ -1,5 +1,5 @@
-from agents import Vehicle
-from settings import Config
+from ns_sim.agents import Vehicle
+from ns_sim.settings import Config
 
 from typing import Optional
 from random import uniform, randrange
@@ -10,8 +10,9 @@ class Node:
     Default parameters
     """
     D_SPAWNED_VEHICLES_LIMIT = 10  # maximum number of vehicles a Source can spawn
-    D_CHANCE_TO_SPAWN = 0.05  # chance to spawn a vehicle on each time step
+    D_CHANCE_TO_SPAWN = 0.01  # chance to spawn a vehicle on each time step
     D_NAME = "Node"
+    D_DEST_RANGE = (0, 1)
 
     def __init__(self, **kwargs):
         """
@@ -30,10 +31,12 @@ class Node:
         # type\: Sink, Source or both
         self.type = kwargs.get("type") if "type" in kwargs else 0
 
+        # parameters regarding spawning vehicles
         self.spawned_vehicles = kwargs.get("spawned_vehicles") if "spawned_vehicles" in kwargs else 0
         self.spawned_vehicles_limit = kwargs.get(
             "spawned_vehicles_limit") if "spawned_vehicles_limit" in kwargs else Node.D_SPAWNED_VEHICLES_LIMIT
         self.chance_to_spawn = kwargs.get("chance_to_spawn") if "chance_to_spawn" in kwargs else Node.D_CHANCE_TO_SPAWN
+        self.dest_range = kwargs.get("dest_range") if "dest_range" in kwargs else Node.D_DEST_RANGE
 
         self.input_road = kwargs.get("input_road") if "input_road" in kwargs else None
         self.output_road = kwargs.get("output_road") if "output_road" in kwargs else None
@@ -43,11 +46,11 @@ class Node:
 
     def try_to_spawn_vehicle(self) -> None:
         # if its a Source, and it haven't spawned all of its possible vehicles, and the stars align
-        if self.type >= 0 and self.spawned_vehicles < self.spawned_vehicles_limit:
+        if self.type >= 0 and (self.spawned_vehicles < self.spawned_vehicles_limit or self.spawned_vehicles_limit < 0):
             spawn_roll = uniform(0, 1)
             if spawn_roll < self.chance_to_spawn and self.output_available():
                 # create a new vehicle and pass it to output Road
-                kwargs = {"road": self.output_road, "config": self.config, "behaviour": 0.01, "dest": randrange(0, 35)}
+                kwargs = {"road": self.output_road, "config": self.config, "dest": randrange(self.dest_range[0], self.dest_range[1])}
                 vehicle = Vehicle(**kwargs)
                 self.output_road.cells[0] = vehicle
                 self.spawned_vehicles += 1
@@ -55,9 +58,10 @@ class Node:
 
     def try_to_remove_vehicle(self) -> None:
         # remove Vehicle that reached its destination at this Node
-        if self.type <= 0 and self.input_available() and self.input_road.cells[-1].dest <= 0:
-            self.removed.append(self.input_road.cells[-1])
-            self.input_road.cells[-1] = None
+        if self.type <= 0 and self.input_available():
+            if self.input_road.cells[-1].dest <= 0 or self.output_road is None:
+                self.removed.append(self.input_road.cells[-1])
+                self.input_road.cells[-1] = None
 
     def input_available(self) -> bool:
         return self.input_road is not None and self.input_road.cells[-1] is not None
