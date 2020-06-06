@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../Fizyka/.idea/Fizyka.iml" filepath="$PROJECT_DIR$/../Fizyka/.idea/Fizyka.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../TileGame/.idea/TileGame.iml" filepath="$PROJECT_DIR$/../TileGame/.idea/TileGame.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/obwodnica.iml" filepath="$PROJECT_DIR$/.idea/obwodnica.iml" />
     </modules>
   </component>
