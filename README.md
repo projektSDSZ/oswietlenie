@@ -41,7 +41,7 @@ Nadrzędnym elementem symulacji jest klasa Simulation, z modułu ns_sim.simulati
 Każdy rząd pikseli to wszystkie komórki drogi połączone w jedną listę, piksele białe to pojazdy, czarne to puste miejsca, obrazuje on stan drogi w jednym kroku czasowym.  
 Kolorowe piksele ukłądające się w pionowe linie oznaczają skrzyżowania, zielone to wjazdy, czerwone to zjazdy, żółte pełnią obie funkcje.  
 Poziome linie ciemnoniebieskie zaznaczają 15 minut czasu w symulacji.  
-Poziome linie w innych kolorach oznaczają zmianę poziomu natężenia ruchu drogowego, cieplejsze (bliższe czerwonemu) kolory oznaczają zmianę na wyższe natężenie ruchu.  
+Poziome linie w innych kolorach oznaczają zmianę poziomu natężenia ruchu drogowego, cieplejsze (bliższe żółtemu) kolory oznaczają zmianę na wyższe natężenie ruchu.  
 
 # Pomoce:
 
