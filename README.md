@@ -37,6 +37,12 @@ Nadrzędnym elementem symulacji jest klasa Simulation, z modułu ns_sim.simulati
              --> informację o aktualnym natężeniu ruchu, **self.phase**, (para w postaci (int, float), pierwsza liczba oznacza o której godzinie (podanej w krokach czasowych) zaczyna się nowa faza ruchu drogowego, druga oznacza szansę w każdym kroku czasowym na pojawienie się samochodu na najmniej ruchliwym ze skrzyżowań)    
 - **Config** - zawiera stałe wartości w symulacji, takie jak długość komórki ruchu drogowego, kroku czasowego, punktów w czasie w których zmieni się natężenie ruchu (self.sim_daytime_phases), czasie symulacji (self.simulation_duration), godzinie rozpoczęcia symulacji (w krokach czasowych, self.sim_start_time); klasa ta powstała w celu spełnienia paradygmatu rozdzielenia problemów: Simulation kontroluje zmieniające się warunki symulacji, Config początkowe, niezmienne wartości, stałe
 
+# Interpretacja tworzonych wykresów
+Każdy rząd pikseli to wszystkie komórki drogi połączone w jedną listę, piksele białe to pojazdy, czarne to puste miejsca, obrazuje on stan drogi w jednym kroku czasowym.
+Kolorowe piksele ukłądające się w pionowe linie oznaczają skrzyżowania, zielone to wjazdy, czerwone to zjazdy, żółte pełnią obie funkcje.
+Poziome linie ciemnoniebieskie zaznaczają 15 minut czasu w symulacji.
+Poziome linie w innych kolorach oznaczają zmianę poziomu natężenia ruchu drogowego, cieplejsze (bliższe czerwonemu) kolory oznaczają zmianę na wyższe natężenie ruchu.
+
 # Pomoce:
 
 Tutorial PyGame:
