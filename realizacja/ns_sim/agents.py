@@ -116,41 +116,6 @@ class Vehicle:
             visible_cells_checked_q += 1
         return -1
 
-        # [OLD]: distance calculation
-        # visible_cells_checked = 1  # increase this for every cell you check in search for a Vehicle, 1 because we
-        # # # start from the next cell
-        # while next_road is not None and visible_cells_checked < self.config.visibility:
-        #     # special case for the Road that the vehicle is on, to only check ahead of it
-        #     # initialize the queue
-        #     if visible_cells_checked == 1:
-        #         curr_road_cells = list(next_road.cells[self.pos + 1:])
-        #     else:
-        #         curr_road_cells = list(next_road.cells)
-        #     # if this Vehicle is on a non-empty Road
-        #     while len(curr_road_cells) > 0:
-        #         if visible_cells_checked > self.config.visibility:
-        #             # if ran out of visible cells then no Vehicle was encountered during the search
-        #             self.dist_to_next = -1
-        #             return -1
-        #         # ELSE
-        #         # see if this cell contains a Vehicle
-        #         if curr_road_cells[0] is not None:
-        #             # if element is a Vehicle, return distance to it
-        #             self.dist_to_next = visible_cells_checked - 1
-        #             return visible_cells_checked - 1
-        #
-        #         curr_road_cells.pop(0)
-        #         visible_cells_checked += 1
-        #
-        #     # if no valid vehicle was found on this road, try to proceed search to the next one
-        #     if next_road.end is not None:
-        #         next_road = next_road.end.output_road
-        #         visible_cells_checked += 1
-        #     else:
-        #         self.dist_to_next = -1
-        #         return -1
-        # return -1
-
     def get_speed_limit(self) -> int:
         return self.road.speed_limit if self.road is not None else -1
 
