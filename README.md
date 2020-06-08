@@ -26,7 +26,7 @@ Silnik symulacji reprezentuje układ dróg na obwodnicy za pomocą klas z moduł
        --> referencje do skrzyżowania na początku i końcu tego odcinka drogi, należy je podać w konstruktorze drogi, **self.start** i **self.end**, (obiekty klasy Node)      
 - **Node** - reprezentuje skrzyżowanie, zawiera informacje o:
        --> typie skrzyżowania, **self.type**, (liczba całkowita, -1 oznacza zjazd z obwodnicy, 1 oznacza wjazd, a 0 funkcjonuje jako jedno i drugie)  
-       --> referencjach do dróg wychodzących i wchodzących na skrzyżowanie, **self.output_road** i **self.input_road**, (obiekty klasy  Road, po podaniu obiektu Node do konstruktora obiektu Road, ten automatycznie ustawi siebie jako input lub output w podanym obiekcie Node)
+       --> referencjach do dróg wychodzących i wchodzących na skrzyżowanie, **self.output_road** i **self.input_road**, (obiekty klasy  Road, po podaniu obiektu Node do konstruktora obiektu Road, ten automatycznie ustawi siebie jako input lub output w podanym obiekcie Node)  
        --> (dla wjazdów) szansę na pojawienie się samochodu na skrzyżowaniu, **self.chance_to_spawn**, (ułamek od 0.00 do 1.00)  
        --> (dla wjazdów) zakres ilości omijanych zjazdów, które zostaną nadane samochodom produkowanym przez ten wjazd, **self.dest_range**, (para liczba całkowitych nieujemnych)  
 
