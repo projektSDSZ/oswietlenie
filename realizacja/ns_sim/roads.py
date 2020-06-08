@@ -44,6 +44,12 @@ class Node:
         self.added = list()  # archive-list of Vehicles added by this Node
         self.removed = list()  # archive-list of Vehicles removed by this Node
 
+    def __str__(self):
+        return f"Name: {self.name} Type: {self.type} Chance to spawn: {self.chance_to_spawn} Dest range: {self.dest_range} Spawned vehicles limit: {self.spawned_vehicles_limit}"
+
+    def __repr__(self):
+        return f"Name: {self.name} Type: {self.type} Chance to spawn: {self.chance_to_spawn} Dest range: {self.dest_range} Spawned vehicles limit: {self.spawned_vehicles_limit}"
+
     def try_to_spawn_vehicle(self) -> None:
         # if its a Source, and it haven't spawned all of its possible vehicles, and the stars align
         if self.type >= 0 and (self.spawned_vehicles < self.spawned_vehicles_limit or self.spawned_vehicles_limit < 0):
@@ -129,6 +135,12 @@ class Road:
 
         # preserve information about overwritten Vehicles
         self.overwritten = list()
+
+    def __str__(self):
+        return f"Length: {self.len} Speed limit: {self.speed_limit} Start: {self.start.name if self.start is not None else self.start} End: {self.end.name if self.end is not None else self.end}"
+
+    def __repr__(self):
+        return f"Length: {self.len} Speed limit: {self.speed_limit} Start: {self.start.name if self.start is not None else self.start} End: {self.end.name if self.end is not None else self.end}"
 
     def step(self):
         for i in range(len(self.cells) - 1, -1, -1):
