@@ -43,7 +43,3 @@ Kolorowe piksele ukłądające się w pionowe linie oznaczają skrzyżowania, zi
 Poziome linie ciemnoniebieskie zaznaczają 15 minut czasu w symulacji.  
 Poziome linie w innych kolorach oznaczają zmianę poziomu natężenia ruchu drogowego, cieplejsze (bliższe żółtemu) kolory oznaczają zmianę na wyższe natężenie ruchu.  
 
-# Pomoce:
-
-Tutorial PyGame:
-https://youtu.be/VO8rTszcW4s
